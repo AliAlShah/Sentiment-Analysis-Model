@@ -16,26 +16,24 @@ model = LogisticRegression()
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 model.fit(x_train, y_train)
 
-score = model.score(x_test, y_test)
-print(score)
+def train():
+    best = 0
+    best_history = []
+    for n in range(1000):
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+        model.fit(x_train, y_train)
 
-best = 0
-best_history = []
-for n in range(100):
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-    model.fit(x_train, y_train)
-
-    score = model.score(x_test, y_test)
-    
-    if score > best:
-        best = score
-        best_history.append(best)
-        with open("savedmodel.pickle", "wb") as f:
-            pickle.dump(model, f)
-    print(n)
-print(best_history)
-print(best)
-
+        score = model.score(x_test, y_test)
+        
+        if score > best:
+            best = score
+            best_history.append(best)
+            with open("savedmodel.pickle", "wb") as f:
+                pickle.dump(model, f)
+        print(n)
+    print(best_history)
+    print(best)
+#train()
 
 def predict(text):
     vector = tfid.transform([text])
@@ -46,4 +44,4 @@ def predict(text):
     else:
         return "Bad Sentiment"
 
-print(predict("I love playing football"))
+print(predict("pizza is disgusting and horrible"))
