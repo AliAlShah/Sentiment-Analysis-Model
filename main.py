@@ -1,8 +1,11 @@
 import pandas as pd
 import pickle
+import tkinter as tk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+
+window = tk.Tk()
 
 data = pd.read_csv("https://raw.githubusercontent.com/laxmimerit/twitter-data/master/twitter30k_cleaned.csv")
 
@@ -16,10 +19,10 @@ model = LogisticRegression()
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 model.fit(x_train, y_train)
 
-def train():
+def train(i):
     best = 0
     best_history = []
-    for n in range(1000):
+    for n in range(i):
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
         model.fit(x_train, y_train)
 
@@ -33,15 +36,39 @@ def train():
         print(n)
     print(best_history)
     print(best)
-#train()
+#train(i)
 
 def predict(text):
     vector = tfid.transform([text])
     pickle_in = open("savedmodel.pickle", "rb")
     answer = pickle.load(pickle_in).predict(vector)
+    new_window = tk.Toplevel(window)
+    
     if answer == [1]:
-        return "Good Sentiment"
+        tk.Label(new_window, text="Good Sentiment").pack()
     else:
-        return "Bad Sentiment"
+        tk.Label(new_window, text="Bad Sentiment").pack()
 
-print(predict("pizza is disgusting and horrible"))
+
+entry = tk.Entry(
+    fg="yellow",
+    bg="blue",
+    width=50
+    )
+
+
+button = tk.Button(
+    text="Predict",
+    width=50,
+    height=1,
+    bg="red",
+    fg="white",
+    command=lambda: predict(entry.get())
+)
+
+
+entry.pack()
+button.pack()
+
+
+window.mainloop()
