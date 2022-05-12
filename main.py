@@ -1,12 +1,13 @@
+from cgitb import text
+from urllib import response
 import pandas as pd
 import pickle
-import tkinter as tk
+from telegram.ext import *
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 
-window = tk.Tk()
-
+API = "5398865408:AAHmaukRXmxfhhUtOMIbX-6AvorE_wldIKE"
 data = pd.read_csv("https://raw.githubusercontent.com/laxmimerit/twitter-data/master/twitter30k_cleaned.csv")
 
 tfid = TfidfVectorizer(max_features=10000, ngram_range=(1, 2))
@@ -42,33 +43,26 @@ def predict(text):
     vector = tfid.transform([text])
     pickle_in = open("savedmodel.pickle", "rb")
     answer = pickle.load(pickle_in).predict(vector)
-    new_window = tk.Toplevel(window)
     
     if answer == [1]:
-        tk.Label(new_window, text="Good Sentiment").pack()
+        return "Good Sentiment"
     else:
-        tk.Label(new_window, text="Bad Sentiment").pack()
+        return "Bad Sentiment"
 
+def start_command(update, context):
+    update.message.reply_text("Type anything to get started")
 
-entry = tk.Entry(
-    fg="yellow",
-    bg="blue",
-    width=50
-    )
+def handle_message(update, context):
+    text = str(update.message.text)
+    response = predict(text)
 
+    update.message.reply_text(response)
 
-button = tk.Button(
-    text="Predict",
-    width=50,
-    height=1,
-    bg="red",
-    fg="white",
-    command=lambda: predict(entry.get())
-)
+updater = Updater(API, use_context=True)
+dp = updater.dispatcher
 
+dp.add_handler(CommandHandler("start", start_command))
+dp.add_handler(MessageHandler(Filters.text, handle_message))
 
-entry.pack()
-button.pack()
-
-
-window.mainloop()
+updater.start_polling()
+updater.idle()
